@@ -1,0 +1,42 @@
+variables:
+  PROJECT_NAME: Otus.PublicSale.WebApi
+  TEST_PROJECT_NAME: Otus.PublicSale.UnitTests
+
+stages:
+    - build
+    - test
+    - docker
+
+build:
+    stage: build
+    image: mcr.microsoft.com/dotnet/core/sdk:3.1    
+    script:
+        - dotnet build src/$PROJECT_NAME/$PROJECT_NAME.csproj -c Release -o content
+    only:
+      - main
+    artifacts:
+      paths:
+        - content
+
+tests:
+    stage: test
+    image: mcr.microsoft.com/dotnet/core/sdk:3.1    
+    only:
+      - main
+    script:
+        - dotnet test src/$TEST_PROJECT_NAME/$TEST_PROJECT_NAME.csproj --logger:"junit;LogFilePath=src/$TEST_PROJECT_NAME/test-result.xml"
+
+ 
+
+docker:
+    stage: docker
+    image: docker:19.03.12
+    services:
+      - docker:19.03.12-dind
+    only:
+      - main
+    before_script:
+      - echo $CI_TOKEN | docker login registry.gitlab.com -u deploy-token --password-stdin
+    script:
+      - docker build ./ -t $CI_REGISTRY_IMAGE:latest
+      - docker push $CI_REGISTRY_IMAGE:latest

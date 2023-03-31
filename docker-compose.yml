@@ -1,0 +1,51 @@
+version: '3'
+services:
+
+  #Notification Db
+  publicsale-notification-db:
+    image: "mongo:4.2.3"
+    container_name: 'publicsale-notification-db'
+    restart: always 
+    ports:
+      - 27017:27017
+    environment: 
+          MONGO_INITDB_ROOT_USERNAME: mongoadmin
+          MONGO_INITDB_ROOT_PASSWORD: _Test123
+
+  #RabbitMq
+  rabbitmq:
+    image: masstransit/rabbitmq:3
+    container_name: 'rabbitmq'
+    restart: always 
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=password
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+  #Redis
+  publicsale-redis:  
+    image: redis    
+    container_name: 'publicsale-redis'
+    restart: always 
+    ports:
+      - 6379:6379
+
+  #Users DB    
+  publicsale-users-db:
+    image: "postgres:9.6.17"
+    container_name: 'publicsale-users-db'
+    restart: always 
+    ports:
+      - 5433:5432
+    environment: 
+      - POSTGRES_PASSWORD=docker
+
+volumes:
+  rabbitmq-data:
+  publicsale-notification-db-data:
+  publicsale-redis-data:
+  publicsale-users-db-data:
